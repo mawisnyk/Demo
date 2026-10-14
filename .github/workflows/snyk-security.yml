@@ -2,61 +2,64 @@ name: Snyk CI/CD Demo
 
 on:
   push:
-    branches: ["main"]        # Runs whenever code is pushed directly to main
+    branches: ["dev"]          # Runs when code is pushed to the dev branch
   pull_request:
-    branches: ["main"]        # Runs whenever a PR is opened/updated targeting main
+    branches: ["main"]         # Runs when a PR is opened/updated targeting main
+  workflow_dispatch:
 
 jobs:
-  security:                   
-    runs-on: ubuntu-latest     
+  security:
+    runs-on: ubuntu-latest     # Fresh GitHub-hosted Ubuntu VM (Node and Docker preinstalled)
 
-    # Environment variables available to every step in this job
-    env:
-      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}         
+    env:                       # Variables available to every step in this job
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}                  # Snyk auth token, read from repo secrets
+      BRANCH: ${{ github.head_ref || github.ref_name }}                         # PR source branch, or the pushed branch on a push
+      REPO_URL: github.com/mawisnyk/Demo             # Repo URL Snyk shows for these snapshots
+
     steps:
-      # Step 1: Pull the repo's code onto the runner so later steps can access it
+      # Step 1: Pull this repo's code onto the runner
       - uses: actions/checkout@v5
 
-      # Step 2: Install Node.js
+      # Step 2: Install Node.js (needed to resolve dependencies and to install the Snyk CLI)
       - name: Set up Node
         uses: actions/setup-node@v5
         with:
           node-version: '24'
 
-      # Step 3: Install the project's own dependencies (package.json)
+      # Step 3: Install the Snyk CLI globally so `snyk` works in later steps
+      - name: Install Snyk CLI
+        run: npm install -g snyk
+
+      # Snyk Code (SAST): run before npm install so node_modules isn't scanned
+      # continue-on-error: true keeps the pipeline green even if issues are found
+      - name: Snyk Code
+        continue-on-error: true
+        run: snyk code test --org=${{ vars.SNYK_ORG }} --severity-threshold=high
+
+      # Snyk Code snapshot: sends results to the Snyk UI, tagged with the branch
+      - name: Snyk Code snapshot
+        continue-on-error: true
+        run: |
+          snyk code test --org=${{ vars.SNYK_ORG }} --severity-threshold=high --report \
+            --project-name=code-analysis \
+            --remote-repo-url=$REPO_URL \
+            --target-reference=$BRANCH \
+            --project-tags=$TAGS
+      
+      # Step 4: Install the project's own dependencies (package.json) so Snyk can resolve them
       - name: Install dependencies
         run: npm install
 
-      # Install the Snyk CLI globally so `snyk` commands work in later steps
-      - name: Install Snyk CLI
-        run: npm install -g snyk
-      
-      # SCAN scan
-      # `|| true` means this step will NEVER fail the pipeline, even if issues are found
-      - name: Snyk SCA
-        run: snyk test || true
+      # Snyk Open Source (SCA) test
+      # `|| true` means this step never fails the pipeline, even if issues are found
+      - name: Snyk Open Source
+        continue-on-error: true
+        run: snyk test --org=${{ vars.SNYK_ORG }} --severity-threshold=high
 
-      # SCA Scan fail build if High or Critical severity issues are found, then it will fail
-      #- name: Snyk test failing pipeline
-      #  run: snyk test --project-name=package.json --org=${{ vars.SNYK_ORG }} --severity-threshold=high
-
-      # SCA Monitor
+      # Snyk Open Source monitor: snapshot to the Snyk UI for ongoing monitoring
       - name: Snyk Open Source monitor
-        run: snyk monitor
-             --project-name=demoapp 
-             --remote-repo-url=github.com/mawidors/Demo
-             --target-reference=${{ github.ref_name }}
-
-      # SAST scan
-      - name: Snyk Code
-        continue-on-error: true
-        run: snyk code test --severity-threshold=high
-
-      # SAST Snapshot
-      - name: Snyk Code Snapshot Results
-        continue-on-error: true
-        run: snyk code test --severity-threshold=high --report 
-             --project-name=demoapp 
-             --remote-repo-url=github.com/mawidors/Demo
-             --target-reference=${{ github.ref_name }}
-      
+        run: |
+          snyk monitor --org=${{ vars.SNYK_ORG }} \
+            --remote-repo-url=$REPO_URL \
+            --target-reference=$BRANCH \
+            --project-tags=$TAGS
