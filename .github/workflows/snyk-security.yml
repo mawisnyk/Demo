@@ -34,7 +34,8 @@ jobs:
       # SCAN scan
       # `|| true` means this step will NEVER fail the pipeline, even if issues are found
       - name: Snyk SCA
-        run: snyk test || true
+        continue-on-error: true
+        run: snyk test --org=${{ vars.SNYK_ORG }} --severity-threshold=high
 
       # SCA Scan fail build if High or Critical severity issues are found, then it will fail
       #- name: Snyk test failing pipeline
@@ -42,21 +43,20 @@ jobs:
 
       # SCA Monitor
       - name: Snyk Open Source monitor
-        run: snyk monitor
-             --project-name=demoapp 
+        run: snyk monitor --org=${{ vars.SNYK_ORG }}
+             --project-name=demoapp
              --remote-repo-url=github.com/mawidors/Demo
              --target-reference=${{ github.ref_name }}
 
       # SAST scan
       - name: Snyk Code
         continue-on-error: true
-        run: snyk code test --severity-threshold=high
+        run: snyk code test --org=${{ vars.SNYK_ORG }} --severity-threshold=high
 
       # SAST Snapshot
       - name: Snyk Code Snapshot Results
-        continue-on-error: true
-        run: snyk code test --severity-threshold=high --report 
-             --project-name=demoapp 
+        run: snyk code test --org=${{ vars.SNYK_ORG }} --severity-threshold=high --report 
+             --project-name=code-analysis 
              --remote-repo-url=github.com/mawidors/Demo
              --target-reference=${{ github.ref_name }}
       
