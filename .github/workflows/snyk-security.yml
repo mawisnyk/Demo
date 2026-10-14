@@ -5,7 +5,8 @@ on:
     branches: ["dev"]        # Runs whenever code is pushed directly to main
   pull_request:
     branches: ["main"]        # Runs whenever a PR is opened/updated targeting main
-
+  workflow_dispatch:
+  
 jobs:
   security:                   
     runs-on: ubuntu-latest     
