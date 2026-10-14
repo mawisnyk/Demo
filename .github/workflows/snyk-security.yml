@@ -38,8 +38,7 @@ jobs:
         continue-on-error: true
         run: snyk test --org=${{ vars.SNYK_ORG }} --severity-threshold=high
 
-      # SCA Scan fail build if High or Critical severity issues are found, then it will fail
-      #- name: Snyk test failing pipeline
+      # SCA Scan fail build if High or Critical severity issues are found
         #run: snyk test --project-name=package.json --org=${{ vars.SNYK_ORG }} --severity-threshold=high
 
       # SCA Monitor
