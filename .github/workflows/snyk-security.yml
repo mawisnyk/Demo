@@ -45,7 +45,6 @@ jobs:
       # SCA Monitor
       - name: Snyk Open Source monitor
         run: snyk monitor --org=${{ vars.SNYK_ORG }}
-             --project-name=demoapp
              --remote-repo-url=github.com/mawidors/Demo
              --target-reference=${{ github.ref_name }}
 
