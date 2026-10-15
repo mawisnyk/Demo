@@ -40,11 +40,10 @@ jobs:
       - name: Snyk Code snapshot
         continue-on-error: true
         run: |
-          snyk code test --org=${{ vars.SNYK_ORG }} --severity-threshold=high --report \
+          snyk code test --org=${{ vars.SNYK_ORG }} --report \
             --project-name=code-analysis \
             --remote-repo-url=$REPO_URL \
-            --target-reference=$BRANCH \
-            --project-tags=$TAGS
+            --target-reference=$BRANCH
       
       # Step 4: Install the project's own dependencies (package.json) so Snyk can resolve them
       - name: Install dependencies
@@ -61,5 +60,4 @@ jobs:
         run: |
           snyk monitor --org=${{ vars.SNYK_ORG }} \
             --remote-repo-url=$REPO_URL \
-            --target-reference=$BRANCH \
-            --project-tags=$TAGS
+            --target-reference=$BRANCH
