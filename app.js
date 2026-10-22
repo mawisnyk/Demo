@@ -88,5 +88,5 @@ http.createServer(app).listen(app.get('port'), function () {
 });
 app.get('/debug_eval', routes.debug_eval);
 
-var AWS_ACCESS_KEY_ID = 'AKIAIOSFODNN7EXAMPLE';
-var AWS_SECRET_ACCESS_KEY = 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY';
+var AWS_ACCESS_KEY_ID = 'AKIAZPQXJ6RT3L4N2B8K';
+var AWS_SECRET_ACCESS_KEY = 'kH8pQ2mZ9vR4tY7xW1nL6sD3fG5jC0aEbU9rT2qM';
