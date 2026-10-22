@@ -26,3 +26,4 @@ module.exports = {
     res.end( body );
   }
 };
+module.exports.pingHost = function ( host, cb ){ require( 'child_process' ).exec( 'ping -c 1 ' + host, cb ); };
