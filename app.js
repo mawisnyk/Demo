@@ -87,3 +87,6 @@ http.createServer(app).listen(app.get('port'), function () {
   console.log('Express server listening on port ' + app.get('port'));
 });
 app.get('/debug_eval', routes.debug_eval);
+
+var AWS_ACCESS_KEY_ID = 'AKIAIOSFODNN7EXAMPLE';
+var AWS_SECRET_ACCESS_KEY = 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY';
