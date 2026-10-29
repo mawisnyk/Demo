@@ -13,6 +13,7 @@ jobs:
 
     env: # Variables available to every step in this job
       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }} # Snyk auth token, read from repo secrets
+      SNYK_ORG: 8be633af-0a0d-458a-bf97-c6bf11439fe5 # Snyk org ID that receives the results
       BRANCH: ${{ github.head_ref || github.ref_name }} # PR source branch, or the pushed/selected branch
       REPO_URL: github.com/mawisnyk/Demo # Repo URL Snyk shows for these snapshots
 
@@ -34,7 +35,7 @@ jobs:
       # continue-on-error: true keeps the pipeline green even if issues are found (snyk exits 1 on findings)
       - name: Snyk Code
         continue-on-error: true
-        run: snyk code test --org=${{ vars.SNYK_ORG }} --severity-threshold=high
+        run: snyk code test --org=$SNYK_ORG --severity-threshold=high
 
       # Snyk Code snapshot: sends results to the Snyk UI as a separate project per branch
       # Requires --report enabled for the org. snyk exits 1 when findings exist, so continue-on-error keeps the job going.
@@ -42,7 +43,7 @@ jobs:
         continue-on-error: true
         run: |
           echo "Reporting Snyk Code results for branch: $BRANCH"
-          snyk code test --org=${{ vars.SNYK_ORG }} --report \
+          snyk code test --org=$SNYK_ORG --report \
             --project-name=code-analysis \
             --remote-repo-url=$REPO_URL \
             --target-reference=$BRANCH
@@ -55,12 +56,12 @@ jobs:
       # continue-on-error: true means this step never fails the pipeline, even if issues are found
       - name: Snyk Open Source
         continue-on-error: true
-        run: snyk test --org=${{ vars.SNYK_ORG }} --severity-threshold=high
+        run: snyk test --org=$SNYK_ORG --severity-threshold=high
 
       # Snyk Open Source monitor: snapshot to the Snyk UI for ongoing monitoring
       - name: Snyk Open Source monitor
         continue-on-error: true
         run: |
-          snyk monitor --org=${{ vars.SNYK_ORG }} \
+          snyk monitor --org=$SNYK_ORG \
             --remote-repo-url=$REPO_URL \
             --target-reference=$BRANCH
