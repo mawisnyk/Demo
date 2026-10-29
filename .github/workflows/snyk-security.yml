@@ -31,14 +31,15 @@ jobs:
         run: npm install -g snyk
 
       # Snyk Code (SAST): run before npm install so node_modules isn't scanned
-      # continue-on-error: true keeps the pipeline green even if issues are found
+      # continue-on-error: true keeps the pipeline green even if issues are found (snyk exits 1 on findings)
       - name: Snyk Code
         continue-on-error: true
         run: snyk code test --org=${{ vars.SNYK_ORG }} --severity-threshold=high
 
       # Snyk Code snapshot: sends results to the Snyk UI as a separate project per branch
-      # Requires --report enabled for the org. Not continue-on-error, so a failure is visible in the log.
+      # Requires --report enabled for the org. snyk exits 1 when findings exist, so continue-on-error keeps the job going.
       - name: Snyk Code snapshot (branch ${{ env.BRANCH }})
+        continue-on-error: true
         run: |
           echo "Reporting Snyk Code results for branch: $BRANCH"
           snyk code test --org=${{ vars.SNYK_ORG }} --report \
