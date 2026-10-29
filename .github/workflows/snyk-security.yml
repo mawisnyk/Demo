@@ -2,19 +2,19 @@ name: Snyk CI/CD Demo
 
 on:
   push:
-    branches: ["dev"]          # Runs when code is pushed to the dev branch
+    branches: ["dev", "feature/**"] # Runs on pushes to dev and any feature/* branch
   pull_request:
-    branches: ["main"]         # Runs when a PR is opened/updated targeting main
-  workflow_dispatch:
+    branches: ["main"] # Runs when a PR is opened/updated targeting main
+  workflow_dispatch: # Manual run: pick the branch in "Use workflow from"
 
 jobs:
   security:
-    runs-on: ubuntu-latest     # Fresh GitHub-hosted Ubuntu VM (Node and Docker preinstalled)
+    runs-on: ubuntu-latest # Fresh GitHub-hosted Ubuntu VM (Node and Docker preinstalled)
 
-    env:                       # Variables available to every step in this job
-      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}                  # Snyk auth token, read from repo secrets
-      BRANCH: ${{ github.head_ref || github.ref_name }}                         # PR source branch, or the pushed branch on a push
-      REPO_URL: github.com/mawisnyk/Demo             # Repo URL Snyk shows for these snapshots
+    env: # Variables available to every step in this job
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }} # Snyk auth token, read from repo secrets
+      BRANCH: ${{ github.head_ref || github.ref_name }} # PR source branch, or the pushed/selected branch
+      REPO_URL: github.com/mawisnyk/Demo # Repo URL Snyk shows for these snapshots
 
     steps:
       # Step 1: Pull this repo's code onto the runner
@@ -36,27 +36,29 @@ jobs:
         continue-on-error: true
         run: snyk code test --org=${{ vars.SNYK_ORG }} --severity-threshold=high
 
-      # Snyk Code snapshot: sends results to the Snyk UI, tagged with the branch
-      - name: Snyk Code snapshot
-        continue-on-error: true
+      # Snyk Code snapshot: sends results to the Snyk UI as a separate project per branch
+      # Requires --report enabled for the org. Not continue-on-error, so a failure is visible in the log.
+      - name: Snyk Code snapshot (branch ${{ env.BRANCH }})
         run: |
+          echo "Reporting Snyk Code results for branch: $BRANCH"
           snyk code test --org=${{ vars.SNYK_ORG }} --report \
             --project-name=code-analysis \
             --remote-repo-url=$REPO_URL \
             --target-reference=$BRANCH
-      
+
       # Step 4: Install the project's own dependencies (package.json) so Snyk can resolve them
       - name: Install dependencies
         run: npm install
 
       # Snyk Open Source (SCA) test
-      # `|| true` means this step never fails the pipeline, even if issues are found
+      # continue-on-error: true means this step never fails the pipeline, even if issues are found
       - name: Snyk Open Source
         continue-on-error: true
         run: snyk test --org=${{ vars.SNYK_ORG }} --severity-threshold=high
 
       # Snyk Open Source monitor: snapshot to the Snyk UI for ongoing monitoring
       - name: Snyk Open Source monitor
+        continue-on-error: true
         run: |
           snyk monitor --org=${{ vars.SNYK_ORG }} \
             --remote-repo-url=$REPO_URL \
