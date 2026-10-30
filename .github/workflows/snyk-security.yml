@@ -44,7 +44,7 @@ jobs:
         run: |
           echo "Reporting Snyk Code results for branch: $BRANCH"
           snyk code test --org=$SNYK_ORG --report \
-            --project-name=code-analysis \
+            --project-name=code-analysis-$BRANCH \
             --remote-repo-url=$REPO_URL \
             --target-reference=$BRANCH
 
@@ -63,5 +63,5 @@ jobs:
         continue-on-error: true
         run: |
           snyk monitor --org=$SNYK_ORG \
-            --remote-repo-url=$REPO_URL \
+            --remote-repo-url=$REPO_URL --project-name=goof-$BRANCH \
             --target-reference=$BRANCH
