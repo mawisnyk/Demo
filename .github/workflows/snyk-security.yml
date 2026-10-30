@@ -34,14 +34,14 @@ jobs:
       # continue-on-error: true keeps the pipeline green even if issues are found
       - name: Snyk Code
         continue-on-error: true
-        run: snyk code test --org=${{ vars.SNYK_ORG }} --severity-threshold=high
+        run: snyk code test --org=8be633af-0a0d-458a-bf97-c6bf11439fe5 --severity-threshold=high
 
       # Snyk Code snapshot: sends results to the Snyk UI, tagged with the branch
       - name: Snyk Code snapshot
         continue-on-error: true
         run: |
-          snyk code test --org=${{ vars.SNYK_ORG }} --report \
-            --project-name=code-analysis-$BRANCH \
+          snyk code test --org=8be633af-0a0d-458a-bf97-c6bf11439fe5 --report \
+            --project-name=code-analysis \
             --remote-repo-url=$REPO_URL \
             --target-reference=$BRANCH
       
@@ -53,11 +53,11 @@ jobs:
       # `|| true` means this step never fails the pipeline, even if issues are found
       - name: Snyk Open Source
         continue-on-error: true
-        run: snyk test --org=${{ vars.SNYK_ORG }} --severity-threshold=high
+        run: snyk test --org=8be633af-0a0d-458a-bf97-c6bf11439fe5 --severity-threshold=high
 
       # Snyk Open Source monitor: snapshot to the Snyk UI for ongoing monitoring
       - name: Snyk Open Source monitor
         run: |
-          snyk monitor --org=${{ vars.SNYK_ORG }} \
-            --remote-repo-url=$REPO_URL --project-name=goof-$BRANCH \
+          snyk monitor --org=8be633af-0a0d-458a-bf97-c6bf11439fe5 \
+            --remote-repo-url=$REPO_URL \
             --target-reference=$BRANCH
