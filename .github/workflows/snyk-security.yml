@@ -2,7 +2,7 @@ name: Snyk CI/CD Demo
 
 on:
   push:
-    branches: ["dev"]          # Runs when code is pushed to the dev branch
+    branches: ["mawisnyk-demo-1", "mawisnyk-demo-2"]  # Runs when code is pushed to either demo branch
   pull_request:
     branches: ["main"]         # Runs when a PR is opened/updated targeting main
   workflow_dispatch:
